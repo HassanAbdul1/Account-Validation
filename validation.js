@@ -1,68 +1,107 @@
 const form = document.getElementById('registerForm');
 const submitBtn = document.getElementById('submitBtn');
 
-const fields = {
-  fullName: {
-    input: document.getElementById('fullName'),
-    error: document.getElementById('fullNameError'),
-    validate: (v) => v.trim().length >= 2,
-    message: "Full Name is required (min 2 characters)."
-  },
-  email: {
-    input: document.getElementById('email'),
-    error: document.getElementById('emailError'),
-    validate: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
-    message: "Please enter a valid email address."
-  },
-  password: {
-    input: document.getElementById('password'),
-    error: document.getElementById('passwordError'),
-    validate: (v) => /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(v),
-    message: "Password must be at least 8 characters with a number and letter."
-  },
-  confirmPassword: {
-    input: document.getElementById('confirmPassword'),
-    error: document.getElementById('confirmPasswordError'),
-    validate: () => fields.confirmPassword.input.value === fields.password.input.value,
-    message: "Passwords must match."
-  },
-  phone: {
-    input: document.getElementById('phone'),
-    error: document.getElementById('phoneError'),
-    validate: (v) => v === "" || /^\+?\d{7,15}$/.test(v),
-    message: "Please enter a valid phone number."
+// Inputs
+const fullNameInput = document.getElementById('fullName');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const confirmPasswordInput = document.getElementById('confirmPassword');
+const phoneInput = document.getElementById('phone');
+
+// Error message containers
+const fullNameError = document.getElementById('fullNameError');
+const emailError = document.getElementById('emailError');
+const passwordError = document.getElementById('passwordError');
+const confirmPasswordError = document.getElementById('confirmPasswordError');
+const phoneError = document.getElementById('phoneError');
+
+// Validation functions
+function validateFullName() {
+  const value = fullNameInput.value.trim();
+  if (value.length < 2) {
+    fullNameError.textContent = "Full Name is required (min 2 characters).";
+    return false;
+  } else {
+    fullNameError.textContent = "";
+    return true;
   }
-};
-
-function validateAllFields() {
-  let allValid = true;
-
-  for (let key in fields) {
-    const field = fields[key];
-    const value = field.input.value;
-    const valid = key === 'confirmPassword' ? field.validate() : field.validate(value);
-
-    if (!valid) {
-      allValid = false;
-      field.error.textContent = field.message;
-    } else {
-      field.error.textContent = '';
-    }
-  }
-
-  submitBtn.disabled = !allValid;
 }
 
-Object.values(fields).forEach(field => {
-  field.input.addEventListener('input', validateAllFields);
-});
+function validateEmail() {
+  const value = emailInput.value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(value)) {
+    emailError.textContent = "Please enter a valid email address.";
+    return false;
+  } else {
+    emailError.textContent = "";
+    return true;
+  }
+}
 
-form.addEventListener('submit', (e) => {
+function validatePassword() {
+  const value = passwordInput.value;
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  if (!passwordRegex.test(value)) {
+    passwordError.textContent = "Password must be at least 8 characters with a number and letter.";
+    return false;
+  } else {
+    passwordError.textContent = "";
+    return true;
+  }
+}
+
+function validateConfirmPassword() {
+  if (confirmPasswordInput.value !== passwordInput.value) {
+    confirmPasswordError.textContent = "Passwords must match.";
+    return false;
+  } else {
+    confirmPasswordError.textContent = "";
+    return true;
+  }
+}
+
+function validatePhone() {
+  const value = phoneInput.value.trim();
+  const phoneRegex = /^\+?\d{7,15}$/;
+  if (value !== "" && !phoneRegex.test(value)) {
+    phoneError.textContent = "Please enter a valid phone number.";
+    return false;
+  } else {
+    phoneError.textContent = "";
+    return true;
+  }
+}
+
+// Check all fields and toggle submit button
+function validateForm() {
+  const isFullNameValid = validateFullName();
+  const isEmailValid = validateEmail();
+  const isPasswordValid = validatePassword();
+  const isConfirmPasswordValid = validateConfirmPassword();
+  const isPhoneValid = validatePhone();
+
+  if (isFullNameValid && isEmailValid && isPasswordValid && isConfirmPasswordValid && isPhoneValid) {
+    submitBtn.disabled = false;
+  } else {
+    submitBtn.disabled = true;
+  }
+}
+
+// Add input listeners
+fullNameInput.addEventListener('input', validateForm);
+emailInput.addEventListener('input', validateForm);
+passwordInput.addEventListener('input', validateForm);
+confirmPasswordInput.addEventListener('input', validateForm);
+phoneInput.addEventListener('input', validateForm);
+
+// Submit handler
+form.addEventListener('submit', function (e) {
   e.preventDefault();
-  validateAllFields();
+  validateForm();
 
   if (!submitBtn.disabled) {
-    // All validations passed
-    window.location.href = '/login.html'; // Change as needed
+    alert("Account created! Redirecting to login...");
+    window.location.href = "/login.html";
   }
 });
